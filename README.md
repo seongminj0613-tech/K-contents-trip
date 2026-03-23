@@ -39,3 +39,20 @@ busan-travel-recommender/
 │  └─ tsconfig.json
 └─ .gitignore
 
+## 실행 방법
+
+### Backend 실행
+```bash
+cd backend
+.\venv\Scripts\Activate.ps1
+uvicorn main:app --reload
+
+Backend 주소
+http://127.0.0.1:8000
+
+### Frontend 주소
+http://localhost:3000
+
+```md
+※ 프론트엔드와 백엔드는 각각 별도 터미널에서 동시에 실행해야 합니다.
+
