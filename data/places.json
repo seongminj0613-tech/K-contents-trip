@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "name": "해운대 바다식당",
+    "category": "맛집",
+    "district": "해운대",
+    "budget_level": "중간",
+    "tags": ["혼밥", "바다뷰", "야간이동"],
+    "description": "혼자서도 부담 없이 식사 가능한 해운대 근처 식당"
+  },
+  {
+    "id": 2,
+    "name": "광안리 포토스팟 카페",
+    "category": "카페",
+    "district": "광안리",
+    "budget_level": "중간",
+    "tags": ["포토스팟", "바다뷰", "조용함"],
+    "description": "광안대교가 보이는 사진 명소 카페"
+  },
+  {
+    "id": 3,
+    "name": "서면 워크허브",
+    "category": "공유오피스",
+    "district": "서면",
+    "budget_level": "높음",
+    "tags": ["공유오피스", "조용함", "장기체류"],
+    "description": "워케이션 이용자에게 적합한 업무 공간"
+  },
+  {
+    "id": 4,
+    "name": "남포 가족공원",
+    "category": "관광지",
+    "district": "남포동",
+    "budget_level": "낮음",
+    "tags": ["유모차접근", "가족", "산책"],
+    "description": "가족 단위 방문객이 편하게 즐길 수 있는 공간"
+  },
+  {
+    "id": 5,
+    "name": "해운대 조용한 북카페",
+    "category": "카페",
+    "district": "해운대",
+    "budget_level": "낮음",
+    "tags": ["조용함", "혼밥", "워케이션"],
+    "description": "혼자 머무르거나 간단한 작업을 하기 좋은 공간"
+  },
+  {
+    "id": 6,
+    "name": "광안리 가족식당",
+    "category": "맛집",
+    "district": "광안리",
+    "budget_level": "중간",
+    "tags": ["가족", "유모차접근", "바다뷰"],
+    "description": "가족 단위로 방문하기 좋은 광안리 식당"
+  },
+  {
+    "id": 7,
+    "name": "서면 스터디카페",
+    "category": "카페",
+    "district": "서면",
+    "budget_level": "낮음",
+    "tags": ["조용함", "혼밥", "장기체류"],
+    "description": "장시간 머무르기 좋은 조용한 공간"
+  }
+]
