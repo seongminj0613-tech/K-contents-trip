@@ -50,7 +50,6 @@ cd backend
 .\venv\Scripts\Activate.ps1
 uvicorn main:app --reload
 
-Backend 주소 : http://127.0.0.1:8000
 
 ### Frontend 실행
 
@@ -58,5 +57,4 @@ cd frontend
 npm install
 npm run dev
 
-Frontend 주소: http://localhost:3000
 
