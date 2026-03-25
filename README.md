@@ -71,3 +71,12 @@ npm run dev
 
 ## 배포 링크
 busan-travel-recommender-qrkjapx2x-seongminj0613-techs-projects.vercel.app
+
+## 현재 상태
+- 프론트엔드는 Vercel을 통해 배포 완료
+- 백엔드는 로컬 환경에서 실행 중
+- 배포 환경에서는 백엔드 미연결 상태로 일부 기능 제한 존재
+
+## 향후 계획
+- FastAPI 백엔드 클라우드 배포 예정
+- 프론트엔드와 API 연동 예정
