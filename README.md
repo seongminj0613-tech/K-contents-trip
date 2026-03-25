@@ -62,3 +62,9 @@ npm run dev
 - Git Flow 기반으로 브랜치 전략을 사용합니다.
 - 기능 단위 작업 후 Pull Request를 통해 main 브랜치에 반영합니다.
 - 추후 퍼블릭 배포 링크를 연결할 예정입니다.
+
+## 보안 설정
+- API Key는 환경변수로 관리
+- .env 파일은 Git에 포함하지 않음
+- CORS 정책 적용 예정
+- HTTPS 기반 배포 예정
