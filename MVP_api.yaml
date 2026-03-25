@@ -1,0 +1,712 @@
+openapi: 3.0.3
+info:
+  title: Busan AI Travel Guide API
+  version: 1.0.0
+  description: |
+    MVP API 명세서.
+
+    범위
+    - 여행 시작점(anchor) 입력
+    - 여행 일정 입력
+    - 여행자 유형 및 기본 선호 조건 입력
+    - 부산 지역 카드 조회
+    - 추천 결과 생성 및 조회
+    - 일정 초안 조회
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+
+tags:
+  - name: Travel Profile
+    description: 사용자 여행 조건 입력 및 저장
+  - name: Regions
+    description: 부산 지역 카드 조회
+  - name: Recommendations
+    description: 추천 생성 및 추천 결과 조회
+  - name: Itineraries
+    description: 일정 초안 조회
+
+paths:
+  /travel-profile:
+    post:
+      tags:
+        - Travel Profile
+      summary: 사용자 여행 정보 입력
+      description: |
+        여행 시작점, 일정, 여행자 유형, 선호 활동, 식단 제약, 분위기 선호, 접근성 요구사항 등을 저장한다.
+        생성된 profile_id는 추천 생성 및 조회에 사용된다.
+      operationId: createTravelProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelProfileCreateRequest'
+            examples:
+              hotelAnchorExample:
+                summary: 호텔을 이미 예약한 경우
+                value:
+                  anchor:
+                    anchor_type: hotel
+                    hotel_name: L7 Haeundae
+                    hotel_address: 55 Haeun-daero 570beon-gil, Haeundae-gu, Busan
+                  schedule:
+                    schedule_type: exact_dates
+                    trip_start_date: 2026-04-10
+                    trip_end_date: 2026-04-12
+                  traveler_type: solo
+                  companion_type: solo
+                  activity_preferences:
+                    - cafe
+                    - beach
+                    - photo_spot
+                  dietary_restrictions:
+                    - vegan
+                  atmosphere_preferences:
+                    - quiet
+                  required_facilities:
+                    - restroom
+                  accessibility_needs:
+                    - elevator_preferred
+                  language: en
+              regionAnchorExample:
+                summary: 호텔 예약 없이 지역 카드로 시작하는 경우
+                value:
+                  anchor:
+                    anchor_type: region_card
+                    region_id: 1
+                  schedule:
+                    schedule_type: season_only
+                    season: spring
+                  traveler_type: family
+                  companion_type: family
+                  activity_preferences:
+                    - sightseeing
+                    - local_food
+                  dietary_restrictions:
+                    - shellfish_allergy
+                  atmosphere_preferences:
+                    - lively
+                  required_facilities:
+                    - parking
+                    - stroller_storage
+                  accessibility_needs:
+                    - stroller_friendly
+                  language: ko
+      responses:
+        '201':
+          description: 여행 프로필 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelProfileCreateResponse'
+        '400':
+          description: 입력값 검증 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 요청 형식 오류
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /regions:
+    get:
+      tags:
+        - Regions
+      summary: 부산 지역 카드 조회
+      description: 부산 주요 지역 카드 목록을 조회한다.
+      operationId: getRegions
+      responses:
+        '200':
+          description: 지역 카드 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionListResponse'
+
+  /recommendations/generate:
+    post:
+      tags:
+        - Recommendations
+      summary: 추천 결과 생성
+      description: 저장된 여행 프로필(profile_id)을 기반으로 추천 결과를 생성한다.
+      operationId: generateRecommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationGenerateRequest'
+            examples:
+              default:
+                value:
+                  profile_id: 101
+      responses:
+        '200':
+          description: 추천 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+        '400':
+          description: 잘못된 요청
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 프로필을 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 추천 생성 실패
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /recommendations/{profile_id}:
+    get:
+      tags:
+        - Recommendations
+      summary: 추천 결과 조회
+      description: 특정 여행 프로필에 대한 최신 추천 결과를 조회한다.
+      operationId: getRecommendationByProfileId
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          description: 여행 프로필 ID
+          schema:
+            type: integer
+            example: 101
+      responses:
+        '200':
+          description: 추천 결과 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+        '404':
+          description: 추천 결과를 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /itineraries/{profile_id}:
+    get:
+      tags:
+        - Itineraries
+      summary: 일정 초안 조회
+      description: 특정 여행 프로필에 대해 생성된 일정 초안을 조회한다.
+      operationId: getItineraryByProfileId
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          description: 여행 프로필 ID
+          schema:
+            type: integer
+            example: 101
+      responses:
+        '200':
+          description: 일정 초안 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItineraryResponse'
+        '404':
+          description: 일정 초안을 찾을 수 없음
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HotelAnchorInput:
+      type: object
+      required:
+        - anchor_type
+        - hotel_name
+        - hotel_address
+      properties:
+        anchor_type:
+          type: string
+          enum:
+            - hotel
+          example: hotel
+        hotel_name:
+          type: string
+          example: L7 Haeundae
+        hotel_address:
+          type: string
+          example: 55 Haeun-daero 570beon-gil, Haeundae-gu, Busan
+
+    RegionCardAnchorInput:
+      type: object
+      required:
+        - anchor_type
+        - region_id
+      properties:
+        anchor_type:
+          type: string
+          enum:
+            - region_card
+          example: region_card
+        region_id:
+          type: integer
+          description: 선택한 부산 지역 카드 ID
+          example: 1
+
+    SkipAnchorInput:
+      type: object
+      required:
+        - anchor_type
+      properties:
+        anchor_type:
+          type: string
+          enum:
+            - skip
+          example: skip
+
+    AnchorInput:
+      oneOf:
+        - $ref: '#/components/schemas/HotelAnchorInput'
+        - $ref: '#/components/schemas/RegionCardAnchorInput'
+        - $ref: '#/components/schemas/SkipAnchorInput'
+      discriminator:
+        propertyName: anchor_type
+        mapping:
+          hotel: '#/components/schemas/HotelAnchorInput'
+          region_card: '#/components/schemas/RegionCardAnchorInput'
+          skip: '#/components/schemas/SkipAnchorInput'
+
+    ExactDateScheduleInput:
+      type: object
+      required:
+        - schedule_type
+        - trip_start_date
+        - trip_end_date
+      properties:
+        schedule_type:
+          type: string
+          enum:
+            - exact_dates
+          example: exact_dates
+        trip_start_date:
+          type: string
+          format: date
+          example: 2026-04-10
+        trip_end_date:
+          type: string
+          format: date
+          example: 2026-04-12
+
+    SeasonOnlyScheduleInput:
+      type: object
+      required:
+        - schedule_type
+        - season
+      properties:
+        schedule_type:
+          type: string
+          enum:
+            - season_only
+          example: season_only
+        season:
+          type: string
+          enum:
+            - spring
+            - summer
+            - autumn
+            - winter
+            - undecided
+          example: spring
+
+    UndecidedScheduleInput:
+      type: object
+      required:
+        - schedule_type
+      properties:
+        schedule_type:
+          type: string
+          enum:
+            - undecided
+          example: undecided
+
+    ScheduleInput:
+      oneOf:
+        - $ref: '#/components/schemas/ExactDateScheduleInput'
+        - $ref: '#/components/schemas/SeasonOnlyScheduleInput'
+        - $ref: '#/components/schemas/UndecidedScheduleInput'
+      discriminator:
+        propertyName: schedule_type
+        mapping:
+          exact_dates: '#/components/schemas/ExactDateScheduleInput'
+          season_only: '#/components/schemas/SeasonOnlyScheduleInput'
+          undecided: '#/components/schemas/UndecidedScheduleInput'
+
+    TravelProfileCreateRequest:
+      type: object
+      required:
+        - anchor
+        - schedule
+        - traveler_type
+        - activity_preferences
+        - dietary_restrictions
+        - atmosphere_preferences
+      properties:
+        anchor:
+          $ref: '#/components/schemas/AnchorInput'
+        schedule:
+          $ref: '#/components/schemas/ScheduleInput'
+        traveler_type:
+          type: string
+          description: 추천 페르소나 기준 여행자 유형
+          enum:
+            - solo
+            - family
+            - workation
+          example: solo
+        companion_type:
+          type: string
+          nullable: true
+          description: 실제 동행 형태
+          enum:
+            - solo
+            - couple
+            - family
+            - friends
+            - group
+          example: solo
+        activity_preferences:
+          type: array
+          minItems: 1
+          description: 선호 활동 목록
+          items:
+            type: string
+          example:
+            - cafe
+            - beach
+            - photo_spot
+        dietary_restrictions:
+          type: array
+          description: 식단 제약 또는 알레르기 정보
+          items:
+            type: string
+          example:
+            - vegan
+        atmosphere_preferences:
+          type: array
+          minItems: 1
+          description: 선호 분위기 목록
+          items:
+            type: string
+          example:
+            - quiet
+        required_facilities:
+          type: array
+          description: 반드시 고려해야 할 시설 조건
+          items:
+            type: string
+          example:
+            - restroom
+            - parking
+        accessibility_needs:
+          type: array
+          description: 이동 및 접근성 요구사항
+          items:
+            type: string
+          example:
+            - elevator_preferred
+            - stroller_friendly
+        language:
+          type: string
+          nullable: true
+          description: 응답 선호 언어
+          example: en
+
+    TravelProfileCreateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: travel profile created successfully
+        data:
+          type: object
+          properties:
+            profile_id:
+              type: integer
+              example: 101
+            traveler_type:
+              type: string
+              example: solo
+            created_at:
+              type: string
+              format: date-time
+              example: 2026-03-24T14:00:00Z
+
+    RegionCard:
+      type: object
+      properties:
+        region_id:
+          type: integer
+          example: 1
+        region_name:
+          type: string
+          example: Haeundae
+        region_description:
+          type: string
+          example: Beach, ocean view, walking course, and photo spots
+        region_themes:
+          type: array
+          items:
+            type: string
+          example:
+            - beach
+            - ocean_view
+            - walking
+        center_latitude:
+          type: number
+          format: float
+          example: 35.1587
+        center_longitude:
+          type: number
+          format: float
+          example: 129.1604
+
+    RegionListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: regions retrieved successfully
+        data:
+          type: object
+          properties:
+            regions:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegionCard'
+
+    RecommendationGenerateRequest:
+      type: object
+      required:
+        - profile_id
+      properties:
+        profile_id:
+          type: integer
+          description: 추천 생성을 위한 여행 프로필 ID
+          example: 101
+
+    PlaceSummary:
+      type: object
+      properties:
+        place_id:
+          type: integer
+          example: 1001
+        name:
+          type: string
+          example: Haeundae Beach
+        category:
+          type: string
+          example: attraction
+        district:
+          type: string
+          example: Haeundae-gu
+        latitude:
+          type: number
+          format: float
+          example: 35.1587
+        longitude:
+          type: number
+          format: float
+          example: 129.1604
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - beach
+            - photo_spot
+            - walking
+        description:
+          type: string
+          example: Representative beach destination in Busan
+        external_url:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/places/1001
+        summary:
+          type: string
+          example: Good for solo walking and ocean-view photography
+
+    RecommendationResultData:
+      type: object
+      properties:
+        recommendation_id:
+          type: integer
+          example: 301
+        profile_id:
+          type: integer
+          example: 101
+        recommended_region:
+          $ref: '#/components/schemas/RegionCard'
+        recommended_places:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceSummary'
+        recommended_food_spots:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceSummary'
+        recommended_cafes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlaceSummary'
+        preparation_tips:
+          type: array
+          items:
+            type: string
+          example:
+            - Bring a light jacket for evening sea breeze
+            - Check weather and sunset time before departure
+        ai_summary:
+          type: string
+          example: >
+            Based on the user's traveler type, activity preferences, dietary restrictions,
+            and atmosphere preferences, the system prioritized suitable coastal attractions,
+            accessible dining options, and places with low movement burden.
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-03-24T14:10:00Z
+
+    RecommendationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: recommendation generated successfully
+        data:
+          $ref: '#/components/schemas/RecommendationResultData'
+
+    ItineraryItem:
+      type: object
+      properties:
+        order:
+          type: integer
+          example: 1
+        place_id:
+          type: integer
+          example: 1001
+        name:
+          type: string
+          example: Haeundae Beach
+        category:
+          type: string
+          example: attraction
+        district:
+          type: string
+          example: Haeundae-gu
+        latitude:
+          type: number
+          format: float
+          example: 35.1587
+        longitude:
+          type: number
+          format: float
+          example: 129.1604
+        external_url:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/places/1001
+        note:
+          type: string
+          example: Best visited in the morning
+
+    ItineraryDay:
+      type: object
+      properties:
+        day:
+          type: integer
+          example: 1
+        summary:
+          type: string
+          example: Haeundae coastal walk and cafe route
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItineraryItem'
+
+    ItineraryData:
+      type: object
+      properties:
+        itinerary_id:
+          type: integer
+          example: 501
+        profile_id:
+          type: integer
+          example: 101
+        itinerary_title:
+          type: string
+          example: 2 Days Busan Solo Trip
+        itinerary_days:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItineraryDay'
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-03-24T14:15:00Z
+
+    ItineraryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: itinerary retrieved successfully
+        data:
+          $ref: '#/components/schemas/ItineraryData'
+
+    ErrorDetail:
+      type: object
+      properties:
+        code:
+          type: string
+          example: INVALID_REQUEST
+        message:
+          type: string
+          example: invalid request
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
