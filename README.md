@@ -68,3 +68,6 @@ npm run dev
 - .env 파일은 Git에 포함하지 않음
 - CORS 정책 적용 예정
 - HTTPS 기반 배포 예정
+
+## 배포 링크
+busan-travel-recommender-qrkjapx2x-seongminj0613-techs-projects.vercel.app
