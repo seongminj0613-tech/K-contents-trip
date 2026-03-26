@@ -39,6 +39,10 @@ busan-travel-recommender/
 │  └─ tsconfig.json
 └─ .gitignore
 
+##  서비스 링크
+
+👉 https://busan-travel-recommender-buf3.vercel.app
+
 ## 실행 방법
 
 프론트엔드와 백엔드는 각각 별도 터미널에서 동시에 실행해야 합니다.
@@ -70,7 +74,7 @@ npm run dev
 - HTTPS 기반 배포 예정
 
 ## 배포 링크
-busan-travel-recommender-qrkjapx2x-seongminj0613-techs-projects.vercel.app
+https://busan-travel-recommender-buf3.vercel.app
 
 ## 현재 상태
 - 프론트엔드는 Vercel을 통해 배포 완료
