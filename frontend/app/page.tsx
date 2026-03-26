@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type RecommendationItem = {
   id: number;
@@ -23,6 +24,7 @@ export default function Home() {
   const [step, setStep] = useState<Step>('intro');
   const [selectedLanguage, setSelectedLanguage] = useState('English');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const router = useRouter();
   
   const slides = [
     {
@@ -90,7 +92,8 @@ export default function Home() {
 
   const handleLanguageSelect = (language: string) => {
     setSelectedLanguage(language);
-    setStep('form');
+    localStorage.setItem('selectedLanguage', language);
+    router.push('/duration');
   };
 
   const handleSubmit = async () => {
