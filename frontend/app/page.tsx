@@ -14,7 +14,7 @@ type RecommendationItem = {
 export default function Home() {
   const [userType, setUserType] = useState('solo');
   const [district, setDistrict] = useState('해운대');
-  const [budget, setBudget] = useState('중간');
+  const [budget, setBudget] = useState('medium');
   const [selectedTags, setSelectedTags] = useState<string[]>(['혼밥', '포토스팟']);
   const [results, setResults] = useState<RecommendationItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,11 +39,14 @@ export default function Home() {
     );
   };
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const handleSubmit = async () => {
     setLoading(true);
 
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/recommend', {
+      const response = await fetch(`${API_URL}/recommend`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,6 +58,11 @@ export default function Home() {
           preferred_tags: selectedTags,
         }),
       });
+
+      if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+      }
+
 
       const data = await response.json();
       setResults(data.results || []);
@@ -123,9 +131,9 @@ export default function Home() {
             onChange={(e) => setBudget(e.target.value)}
             style={{ width: '100%', padding: '10px' }}
           >
-            <option value="낮음">낮음</option>
-            <option value="중간">중간</option>
-            <option value="높음">높음</option>
+            <option value="low">낮음</option>
+            <option value="medium">중간</option>
+            <option value="high">높음</option>
           </select>
         </div>
 
