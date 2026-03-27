@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const router = useRouter();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const slides = [
     {
@@ -31,20 +33,38 @@ export default function Home() {
   ];
 
   useEffect(() => {
+    if (isTransitioning) return;
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 2200);
 
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, isTransitioning]);
 
-  const goToPrevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const moveSlideWithDelay = (direction: "prev" | "next") => {
+    if (isTransitioning) return;
+
+    setIsTransitioning(true);
+
+    timeoutRef.current = setTimeout(() => {
+      setCurrentSlide((prev) => {
+        if (direction === "prev") {
+          return (prev - 1 + slides.length) % slides.length;
+        }
+        return (prev + 1) % slides.length;
+      });
+
+      setIsTransitioning(false);
+    }, 280);
   };
 
-  const goToNextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
   const slide = slides[currentSlide];
 
   return (
@@ -60,6 +80,7 @@ export default function Home() {
         alignItems: "center",
         justifyContent: "center",
         padding: "40px 20px",
+        transition: "background-image 0.3s ease",
       }}
     >
       <div
@@ -77,6 +98,9 @@ export default function Home() {
           zIndex: 1,
           textAlign: "center",
           maxWidth: "720px",
+          opacity: isTransitioning ? 0.88 : 1,
+          transform: isTransitioning ? "scale(0.995)" : "scale(1)",
+          transition: "all 0.28s ease",
         }}
       >
         <p
@@ -119,41 +143,47 @@ export default function Home() {
             gap: "12px",
           }}
         >
-         <button
-           type="button"
-           onClick={goToPrevSlide}
-           style={{
-             width: "48px",
-             height: "48px",
-             borderRadius: "999px",
-             border: "1px solid rgba(255,255,255,0.3)",
-             background: "rgba(255,255,255,0.1)",
-             color: "white",
-             cursor: "pointer",
-             fontSize: "20px",
-           }}
-           aria-label="Previous slide"
-        >
-          ←
-         </button>
+          <button
+            type="button"
+            onClick={() => moveSlideWithDelay("prev")}
+            disabled={isTransitioning}
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "999px",
+              border: "1px solid rgba(255,255,255,0.3)",
+              background: "rgba(255,255,255,0.1)",
+              color: "white",
+              cursor: isTransitioning ? "default" : "pointer",
+              fontSize: "20px",
+              opacity: isTransitioning ? 0.7 : 1,
+              transition: "all 0.2s ease",
+            }}
+            aria-label="Previous slide"
+          >
+            ←
+          </button>
 
-         <button
-           type="button"
-           onClick={goToNextSlide}
-           style={{
-            width: "48px",
-            height: "48px",
-            borderRadius: "999px",
-            border: "1px solid rgba(255,255,255,0.3)",
-            background: "rgba(255,255,255,0.1)",
-            color: "white",
-            cursor: "pointer",
-            fontSize: "20px",
-          }}
-          aria-label="Next slide"
-        >
-          →
-         </button>
+          <button
+            type="button"
+            onClick={() => moveSlideWithDelay("next")}
+            disabled={isTransitioning}
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "999px",
+              border: "1px solid rgba(255,255,255,0.3)",
+              background: "rgba(255,255,255,0.1)",
+              color: "white",
+              cursor: isTransitioning ? "default" : "pointer",
+              fontSize: "20px",
+              opacity: isTransitioning ? 0.7 : 1,
+              transition: "all 0.2s ease",
+            }}
+            aria-label="Next slide"
+          >
+            →
+          </button>
         </div>
 
         <div
@@ -168,7 +198,7 @@ export default function Home() {
             <button
               key={index}
               type="button"
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => !isTransitioning && setCurrentSlide(index)}
               style={{
                 width: currentSlide === index ? "36px" : "10px",
                 height: "10px",
