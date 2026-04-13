@@ -1,4 +1,4 @@
-# K-Drama Food Trip
+# K-Contents trip
 
 K-Drama 기반 감성 여행 추천 서비스  
 드라마 속 장면을 따라 실제 장소와 음식, 문화를 경험할 수 있도록 연결하는 프로젝트입니다.
