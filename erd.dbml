@@ -1,0 +1,170 @@
+Table regions {
+  id bigint [pk, increment]
+  code varchar(30) [not null, unique]
+  name varchar(50) [not null, unique]
+  description text
+  is_mvp boolean [not null, default: false]
+  display_order int [not null, default: 0]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table contents {
+  id bigint [pk, increment]
+  title_ko varchar(100) [not null]
+  title_en varchar(100)
+  content_type varchar(30) [not null, note: 'DRAMA, SURVIVAL, MOVIE']
+  release_year int
+  description text
+  poster_url text
+  is_mvp boolean [not null, default: true]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table places {
+  id bigint [pk, increment]
+  region_id bigint [not null]
+  name varchar(120) [not null]
+  category varchar(50) [not null, note: 'filming_site, cafe, museum, market']
+  road_address varchar(255)
+  jibun_address varchar(255)
+  latitude numeric(10,7)
+  longitude numeric(10,7)
+  short_description varchar(255)
+  description text
+  opening_hours text
+  closed_days text
+  price_info text
+  contact varchar(50)
+  website_url text
+  image_url text
+  is_featured boolean [not null, default: false]
+  is_active boolean [not null, default: true]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    region_id
+  }
+}
+
+Table place_tags {
+  id bigint [pk, increment]
+  tag_key varchar(50) [not null, unique]
+  tag_name varchar(50) [not null, unique]
+  created_at timestamp [not null]
+}
+
+Table place_tag_mappings {
+  id bigint [pk, increment]
+  place_id bigint [not null]
+  tag_id bigint [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    place_id
+    tag_id
+    (place_id, tag_id) [unique]
+  }
+}
+
+Table content_place_mappings {
+  id bigint [pk, increment]
+  content_id bigint [not null]
+  place_id bigint [not null]
+  scene_note text
+  is_primary boolean [not null, default: true]
+  created_at timestamp [not null]
+
+  indexes {
+    content_id
+    place_id
+    (content_id, place_id) [unique]
+  }
+}
+
+Table travel_profiles {
+  id bigint [pk, increment]
+  trip_start_date date [not null]
+  trip_end_date date [not null]
+  transport_mode varchar(30) [note: 'car, public_transport, mixed']
+  pace_level varchar(30) [note: 'relaxed, moderate, tight']
+  budget_level varchar(30) [note: 'low, medium, high']
+  companion_type varchar(30) [note: 'solo, couple, family, friends']
+  notes text
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table travel_profile_regions {
+  id bigint [pk, increment]
+  travel_profile_id bigint [not null]
+  region_id bigint [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    travel_profile_id
+    region_id
+    (travel_profile_id, region_id) [unique]
+  }
+}
+
+Table travel_profile_tag_preferences {
+  id bigint [pk, increment]
+  travel_profile_id bigint [not null]
+  tag_id bigint [not null]
+  created_at timestamp [not null]
+
+  indexes {
+    travel_profile_id
+    tag_id
+    (travel_profile_id, tag_id) [unique]
+  }
+}
+
+Table itineraries {
+  id bigint [pk, increment]
+  travel_profile_id bigint [not null]
+  title varchar(150) [not null]
+  summary text
+  total_days int [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    travel_profile_id
+  }
+}
+
+Table itinerary_items {
+  id bigint [pk, increment]
+  itinerary_id bigint [not null]
+  day_number int [not null]
+  sequence_no int [not null]
+  place_id bigint [not null]
+  start_time time
+  end_time time
+  memo text
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+
+  indexes {
+    itinerary_id
+    place_id
+    (itinerary_id, day_number, sequence_no) [unique]
+  }
+}
+
+Ref: places.region_id > regions.id
+Ref: place_tag_mappings.place_id > places.id
+Ref: place_tag_mappings.tag_id > place_tags.id
+Ref: content_place_mappings.content_id > contents.id
+Ref: content_place_mappings.place_id > places.id
+Ref: travel_profile_regions.travel_profile_id > travel_profiles.id
+Ref: travel_profile_regions.region_id > regions.id
+Ref: travel_profile_tag_preferences.travel_profile_id > travel_profiles.id
+Ref: travel_profile_tag_preferences.tag_id > place_tags.id
+Ref: itineraries.travel_profile_id > travel_profiles.id
+Ref: itinerary_items.itinerary_id > itineraries.id
+Ref: itinerary_items.place_id > places.id
